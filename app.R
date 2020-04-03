@@ -15,7 +15,6 @@ if(!require(shinythemes)) install.packages("shinythemes", repos = "http://cran.u
 if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-project.org")
 if(!require(gganimate)) install.packages("gganimate", repos = "http://cran.us.r-project.org")
 
-
 #create names dataframes from ncov
 ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
 names_df <- ncov[2]
