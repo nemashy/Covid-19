@@ -131,15 +131,6 @@ deaths_daily <- bind_cols(dates1, deaths1)
 recov_daily <- bind_cols(dates1, recov1)
 
 
-
-
-
-
-
-
-
-
-
 world <- ne_countries()
 names2_df <- world@data[18] # names from world to compare with
 
