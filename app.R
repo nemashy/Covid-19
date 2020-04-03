@@ -16,7 +16,8 @@ if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-projec
 if(!require(gganimate)) install.packages("gganimate", repos = "http://cran.us.r-project.org")
 
 #create names dataframes from ncov
-ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
+#ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
+ncov <- read.csv("covid.csv")
 names_df <- ncov[2]
 names_df <- names_df %>%
     distinct(Country.Region)
@@ -87,7 +88,7 @@ ncov1 <- ncov %>%
 #change country.region to "name"
 names(ncov1)[2] <- "name"
 names(ncov1) <- tolower(names(ncov1))
-ncov1$date <- as.Date(ncov1$date)
+ncov1$date <- ymd(as.character(ncov1$date))
 
 #data for the datatable
 data_tab <- ncov1 %>%
