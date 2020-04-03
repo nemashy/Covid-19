@@ -346,6 +346,7 @@ server <- function(input, output, session) {
         
     })
     
+    
     output$text6 <- renderText({
         data <- ncov2 %>% filter(name %in% input$country)%>%
             group_by(name) %>%
