@@ -5,7 +5,6 @@ if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.
 if(!require(lubridate)) install.packages("lubridate", repos = "http://cran.us.r-project.org")
 if(!require(DT)) install.packages("DT", repos = "http://cran.us.r-project.org")
 if(!require(plotly)) install.packages("plotly", repos = "http://cran.us.r-project.org")
-
 if(!require(leaflet)) install.packages("leaflet", repos = "http://cran.us.r-project.org")
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(rnaturalearth)) install.packages("rnaturalearth", repos = "http://cran.us.r-project.org")
@@ -78,10 +77,6 @@ for (i in 1:nrow(ncov)){
     
 }
 
-
-
-
-
 #remove province
 ncov1 <- ncov %>% 
     dplyr::select(-3)
@@ -89,6 +84,10 @@ ncov1 <- ncov %>%
 names(ncov1)[2] <- "name"
 names(ncov1) <- tolower(names(ncov1))
 ncov1$date <- ymd(as.character(ncov1$date))
+
+#add continent
+name_cont <- world@data %>% select(name, continent)
+ncov1 <- left_join(ncov1, name_cont, by = "name")
 
 #data for the datatable
 data_tab <- ncov1 %>%
@@ -154,12 +153,11 @@ pal <- colorBin("Reds",data_tab,
 #           opacity = 1)
 
 #point size
+
 s = 0.5
 
 ui <- navbarPage(h4("Covid-19"),
                  tabPanel(h4("Country"),
-                          
-                          
                           setBackgroundColor("#dddddd"),
                           sidebarLayout(
                               sidebarPanel(width = 3,
@@ -175,13 +173,7 @@ ui <- navbarPage(h4("Covid-19"),
                                                
                                                radioButtons("countryplot", "New cases", c("Confirmed" = "conf","Recovered" = "recov", "Deaths" = "deaths"), selected = "conf", inline = TRUE),
                                                plotlyOutput("plot10", height = "200px")
-                                               
-                                               
-                                               
                                            )
-                                           
-                                           
-                                           
                               ),
                               mainPanel( width = 9,
                                          leafletOutput("mymap", width = "100%", height = "550px"),
@@ -221,6 +213,7 @@ ui <- navbarPage(h4("Covid-19"),
                                      plotlyOutput("plot3"))
                           )
                  ),
+                 
                  tabPanel(h4("World Data"),
                           DTOutput("tbl"),
                           #world data division
@@ -239,10 +232,9 @@ ui <- navbarPage(h4("Covid-19"),
                                      plotlyOutput("plot8"))
                           )
                  ),
-                 theme = shinytheme("united")
                  
+                 theme = shinytheme("united")
 )
-
 
 server <- function(input, output, session) {
     
@@ -406,19 +398,30 @@ server <- function(input, output, session) {
     })
     
     output$tbl = renderDT(data_tab, options = list(lengthChange = TRUE))
+    
     output$mymap <- renderLeaflet({
         leaflet(world, options = leafletOptions(
             attributionControl=FALSE)) %>%
             addPolygons(color = ~pal(Confirmed), weight = 1, smoothFactor = 0.5,
                         opacity = 1.0, fillOpacity = 0.5,
                         highlightOptions = highlightOptions(color = "#000066", weight = 2,
-                                                            bringToFront = TRUE), label = world@data$name) %>%
+                                                            bringToFront = TRUE), label = paste(world@data$name, "<br/>",  "Confirmed: ", (ncov2 %>% filter(name == "Italy")%>%
+                                                                                                                                               group_by(name) %>%
+                                                                                                                                               #put last row not max
+                                                                                                                                               summarise(conf = max(conf),deaths = max(deaths),recov = max(recov) ))$conf) ) %>%
             
             addLegend( pal = pal, values = ~Confirmed,
                        title = "Confirmed Cases",
                        opacity = 0.5, position =  "bottomleft") %>%
             setView(0.5096,47.770345, zoom=2)
     })
+    
+    (ncov2 %>% filter(name == "Italy")%>%
+        group_by(name) %>%
+        #put last row not max
+        summarise(conf = max(conf),deaths = max(deaths),recov = max(recov) ))$conf
+    paste(comma(data$conf))
+    
     
     proxy <- leafletProxy("mymap")
     observe({
