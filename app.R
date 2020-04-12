@@ -89,6 +89,33 @@ ncov1$date <- ymd(as.character(ncov1$date))
 name_cont <- world@data %>% select(name, continent)
 ncov1 <- left_join(ncov1, name_cont, by = "name")
 
+
+###
+
+cont_data <- ncov1 %>% 
+    group_by(continent) %>%
+    summarise(deaths = sum(deaths, na.rm = TRUE))
+levels(cont_data$continent) = c(levels(cont_data$continent), "Other")
+
+for (i in 1:nrow(cont_data)){
+    if(is.na(cont_data$continent[i])){
+        cont_data$continent[i] = "Other"
+    }
+}
+
+
+library(plotly)
+trace1 <- list(
+    hole = 0.8, 
+    type = "pie", 
+    labels = as.character(cont_data$continent), 
+    values = cont_data$deaths, 
+    showlegend = TRUE
+)
+p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
+p
+###
+
 #data for the datatable
 data_tab <- ncov1 %>%
     group_by(name) %>%
