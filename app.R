@@ -16,8 +16,12 @@ if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-projec
 if(!require(gganimate)) install.packages("gganimate", repos = "http://cran.us.r-project.org")
 
 #create names dataframes from ncov
-#ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
-ncov <- read.csv("covid.csv")
+ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
+world <- ne_countries()
+# save a local copy
+#write.csv(ncov, "covid.csv")
+#ncov <- read.csv("covid.csv")
+
 names_df <- ncov[2]
 names_df <- names_df %>%
     distinct(Country.Region)
@@ -109,16 +113,7 @@ for (i in 1:nrow(cont_data)){
     }
 }
 
-trace1 <- list(
-    hole = 0.8,
-    type = "pie",
-    labels = as.character(cont_data$continent),
-    values = cont_data$deaths,
-    showlegend = TRUE
-)
-p <- plot_ly()
-p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
-p
+
 
 #data for the datatable
 data_tab <- ncov1 %>%
@@ -161,7 +156,7 @@ deaths_daily <- bind_cols(dates1, deaths1)
 recov_daily <- bind_cols(dates1, recov1)
 
 
-world <- ne_countries()
+
 names2_df <- world@data[18] # names from world to compare with
 
 world@data <- left_join( world@data, data_tab, by = "name")
@@ -252,6 +247,15 @@ ui <- navbarPage(h4("Covid-19"),
                           )
                  ),
                  tabPanel(h4("World Data"),
+                          fluidRow(
+                              column(4,
+                                     plotlyOutput("plot11")),
+                              column(4,
+                                     plotlyOutput("plot12")),
+                              column(4,
+                                     plotlyOutput("plot13"))
+                          ),
+                          
                           DTOutput("tbl"),
                           #world data division
                           fluidRow(
@@ -376,6 +380,58 @@ server <- function(input, output, session) {
         
     })
     
+    output$plot11 <- renderPlotly({
+        trace1 <- list(
+            hole = 0.8,
+            type = "pie",
+            labels = as.character(cont_data$continent),
+            values = cont_data$conf,
+            showlegend = TRUE
+        )
+        layout <- list(
+            title = "Confirmed",
+            paper_bgcolor="#dddddd")
+        p <- plot_ly()
+        p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
+        p <- layout(p, title=layout$title, paper_bgcolor = layout$paper_bgcolor)
+        p
+    })
+    
+    output$plot12 <- renderPlotly({
+        trace1 <- list(
+            hole = 0.8,
+            type = "pie",
+            labels = as.character(cont_data$continent),
+            values = cont_data$recov,
+            showlegend = TRUE
+        )
+        layout <- list(
+            title = "Recoveries",
+            paper_bgcolor="#dddddd")
+        p <- plot_ly()
+        p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
+        p <- layout(p, title=layout$title, paper_bgcolor = layout$paper_bgcolor)
+        p
+        
+    })
+    
+    output$plot13 <- renderPlotly({
+        trace1 <- list(
+            hole = 0.8,
+            type = "pie",
+            labels = as.character(cont_data$continent),
+            values = cont_data$deaths,
+            showlegend = TRUE
+        )
+        layout <- list(
+            title = "Deaths",
+            paper_bgcolor="#dddddd")
+        
+        p <- plot_ly()
+        p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
+        p <- layout(p, title=layout$title, paper_bgcolor = layout$paper_bgcolor)
+        p
+    })
     
     output$text6 <- renderText({
         data <- ncov2 %>% filter(name %in% input$country)%>%
