@@ -13,10 +13,13 @@ if(!require(shinyWidgets)) install.packages("shinyWidgets", repos = "http://cran
 if(!require(shinythemes)) install.packages("shinythemes", repos = "http://cran.us.r-project.org")
 if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-project.org")
 if(!require(gganimate)) install.packages("gganimate", repos = "http://cran.us.r-project.org")
+if(!require(plotly)) install.packages("plotly", repos = "http://cran.us.r-project.org")
+
+s = 0.5
 
 #create names dataframes from ncov
-#ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
-ncov <- read.csv("covid.csv")
+ncov <- read.csv("https://raw.githubusercontent.com/datasets/covid-19/master/data/time-series-19-covid-combined.csv")
+#ncov <- read.csv("covid.csv")
 names_df <- ncov[2]
 names_df <- names_df %>%
     distinct(Country.Region)
@@ -92,28 +95,28 @@ ncov1 <- left_join(ncov1, name_cont, by = "name")
 
 ###
 
-cont_data <- ncov1 %>% 
-    group_by(continent) %>%
-    summarise(deaths = sum(deaths, na.rm = TRUE))
-levels(cont_data$continent) = c(levels(cont_data$continent), "Other")
-
-for (i in 1:nrow(cont_data)){
-    if(is.na(cont_data$continent[i])){
-        cont_data$continent[i] = "Other"
-    }
-}
-
-
-library(plotly)
-trace1 <- list(
-    hole = 0.8, 
-    type = "pie", 
-    labels = as.character(cont_data$continent), 
-    values = cont_data$deaths, 
-    showlegend = TRUE
-)
-p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
-p
+# cont_data <- ncov1 %>% 
+#     filter(date == max(date)) %>%
+#     group_by(continent) %>%
+#     summarise(conf = sum(confirmed, na.rm = TRUE) ,recov = sum(recovered, na.rm = TRUE), deaths = sum(deaths, na.rm = TRUE))
+# levels(cont_data$continent) = c(levels(cont_data$continent), "Other")
+# 
+# for (i in 1:nrow(cont_data)){
+#     if(is.na(cont_data$continent[i])){
+#         cont_data$continent[i] = "Other"
+#     }
+# }
+# 
+# trace1 <- list(
+#     hole = 0.8, 
+#     type = "pie", 
+#     labels = as.character(cont_data$continent), 
+#     values = cont_data$deaths, 
+#     showlegend = TRUE
+# )
+# p <- plot_ly()
+# p <- add_trace(p, hole=trace1$hole, type=trace1$type, labels=trace1$labels, values=trace1$values, showlegend=trace1$showlegend)
+# p
 ###
 
 #data for the datatable
@@ -181,7 +184,7 @@ pal <- colorBin("Reds",data_tab,
 
 #point size
 
-s = 0.5
+
 
 ui <- navbarPage(h4("Covid-19"),
                  tabPanel(h4("Country"),
