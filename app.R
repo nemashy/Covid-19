@@ -22,6 +22,7 @@ world <- ne_countries()
 #write.csv(ncov, "covid.csv")
 #ncov <- read.csv("covid.csv")
 
+
 names_df <- ncov[2]
 names_df <- names_df %>%
     distinct(Country.Region)
@@ -32,59 +33,76 @@ levels(ncov$Country.Region) = c(levels(ncov$Country.Region), "United States", "C
                                 "Bosnia and Herz.", "Macedonia", "Korea", "Taiwan")
 #Change the names so that they match with country names in the world dataset
 #this makes it easier to create the maps
-for (i in 1:nrow(ncov)){
-    if(ncov$Country.Region[i] == "US"){
-        ncov$Country.Region[i] = "United States"
-    }
-    else if(ncov$Country.Region[i] == "Cote d'Ivoire"){
-        ncov$Country.Region[i] = "Côte d'Ivoire"
-    }
-    else if(ncov$Country.Region[i] == "Congo (Kinshasa)"){
-        ncov$Country.Region[i] = "Dem. Rep. Congo"
-    }
-    else if(ncov$Country.Region[i] == "Congo (Brazzaville)"){
-        ncov$Country.Region[i] = "Congo"
-    }
-    else if(ncov$Country.Region[i] == "Central African Republic"){
-        ncov$Country.Region[i] = "Central African Rep."
-    }
-    else if(ncov$Country.Region[i] == "Eswatini"){
-        ncov$Country.Region[i] = "Swaziland"
+# for (i in 1:nrow(ncov)){
+#     if(ncov$Country.Region[i] == "US"){
+#         ncov$Country.Region[i] = "United States"
+#     }
+#     else if(ncov$Country.Region[i] == "Cote d'Ivoire"){
+#         ncov$Country.Region[i] = "Côte d'Ivoire"
+#     }
+#     else if(ncov$Country.Region[i] == "Congo (Kinshasa)"){
+#         ncov$Country.Region[i] = "Dem. Rep. Congo"
+#     }
+#     else if(ncov$Country.Region[i] == "Congo (Brazzaville)"){
+#         ncov$Country.Region[i] = "Congo"
+#     }
+#     else if(ncov$Country.Region[i] == "Central African Republic"){
+#         ncov$Country.Region[i] = "Central African Rep."
+#     }
+#     else if(ncov$Country.Region[i] == "Eswatini"){
+#         ncov$Country.Region[i] = "Swaziland"
+#     }
+#     
+#     else if(ncov$Country.Region[i] == "Czechia"){
+#         ncov$Country.Region[i] = "Czech Rep."
+#     }
+#     
+#     else if(ncov$Country.Region[i] == "Bosnia and Herzegovina"){
+#         ncov$Country.Region[i] = "Bosnia and Herz."
+#     }
+#     else if(ncov$Country.Region[i] == "North Macedonia"){
+#         ncov$Country.Region[i] = "Macedonia"
+#     }
+#     
+#     else if(ncov$Country.Region[i] == "Taiwan*"){
+#         ncov$Country.Region[i] = "Taiwan"
+#     }
+#     else if(ncov$Country.Region[i] == "Korea, South"){
+#         ncov$Country.Region[i] = "Korea"
+#     }
+# 
+#     else if (ncov$Country.Region[i] == "Dominican Republic"){
+#         ncov$Country.Region[i] = "Dominican Rep."
+#     }
+#     
+#     else if (ncov$Country.Region[i] == "Equatorial Guinea"){
+#         ncov$Country.Region[i] = "Eq. Guinea"
+#     }
+#     
+# }
+
+## creating function for correcting names
+org_name <- c("US", "Cote d'Ivoire", "Congo (Kinshasa)", "Congo (Brazzaville)",
+              "Central African Republic", "Eswatini", "Czechia", "Bosnia and Herzegovina",
+              "North Macedonia", "Taiwan*", "Korea, South", "Dominican Republic", "Equatorial Guinea")
+new_name <- c("United States", "Côte d'Ivoire", "Dem. Rep. Congo", "Congo",  "Central African Rep.", 
+              "Swaziland", "Czech Rep.", "Bosnia and Herz.", "Macedonia", "Taiwan", "Korea", "Dominican Rep.",
+              "Eq. Guinea")
+
+name_convert = function(x){
+    if(x %in% org_name){
+        # give back the name is the new_name vector
+        new_country_name <- new_name[match(x, org_name)]
     }
     
-    else if(ncov$Country.Region[i] == "Czechia"){
-        ncov$Country.Region[i] = "Czech Rep."
+    else{
+        new_country_name <- as.character(x)
     }
     
-    else if(ncov$Country.Region[i] == "Bosnia and Herzegovina"){
-        ncov$Country.Region[i] = "Bosnia and Herz."
-    }
-    else if(ncov$Country.Region[i] == "North Macedonia"){
-        ncov$Country.Region[i] = "Macedonia"
-    }
-    
-    else if(ncov$Country.Region[i] == "Taiwan*"){
-        ncov$Country.Region[i] = "Taiwan"
-    }
-    else if(ncov$Country.Region[i] == "Korea, South"){
-        ncov$Country.Region[i] = "Korea"
-    }
-    else if (ncov$Country.Region[i] == "Korea, South"){
-        ncov$Country.Region[i] = "Korea"
-    }
-    else if (ncov$Country.Region[i] == "Dominican Republic"){
-        ncov$Country.Region[i] = "Dominican Rep."
-    }
-    
-    else if (ncov$Country.Region[i] == "Equatorial Guinea"){
-        ncov$Country.Region[i] = "Eq. Guinea"
-    }
-    
+    return(new_country_name)
 }
 
-
-
-
+ncov$Country.Region <- sapply(ncov$Country.Region, FUN = name_convert) 
 
 #remove province
 ncov1 <- ncov %>% 
@@ -527,6 +545,7 @@ server <- function(input, output, session) {
         # else{}
     })
 }
+
 
 
 
