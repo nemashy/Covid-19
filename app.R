@@ -22,7 +22,6 @@ world <- ne_countries()
 #write.csv(ncov, "covid.csv")
 #ncov <- read.csv("covid.csv")
 
-
 names_df <- ncov[2]
 names_df <- names_df %>%
     distinct(Country.Region)
@@ -136,7 +135,7 @@ for (i in 1:nrow(cont_data)){
 #data for the datatable
 data_tab <- ncov1 %>%
     group_by(name) %>%
-    summarise(Confirmed = max(confirmed), Recovered = max(recovered, na.rm = T), Deaths = max(deaths)) %>%
+    summarise(Confirmed = max(confirmed, na.rm = T), Recovered = max(recovered, na.rm = T), Deaths = max(deaths, na.rm = T)) %>%
     arrange(desc(Confirmed))%>%
     mutate(Deaths_Percent = round(Deaths*100/Confirmed, digits = 2), Recovery_Percent = round(Recovered*100/Confirmed, digits = 2))
 #ncov2 to be use for plotting points(might be redundant)
