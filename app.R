@@ -128,8 +128,8 @@ pal <- colorBin("Reds",data_tab,
 s = 0.5
 
 
-ui <- navbarPage(h4("Covid-19"),
-                 tabPanel(h4("Country"),
+ui <- navbarPage("Covid-19",
+                 tabPanel("Country",
                           setBackgroundColor("#dddddd"),
                           sidebarLayout(
                               sidebarPanel(width = 3,
@@ -180,7 +180,7 @@ ui <- navbarPage(h4("Covid-19"),
                           )
                  ),
                  
-                 tabPanel(h4("Statistical Graphs"),
+                 tabPanel("Statistical Graphs",
                           selectInput("country2", "Country", choices = world@data[["name"]], selected = "", multiple = FALSE),
                           fluidRow(
                               column(4,
@@ -200,7 +200,7 @@ ui <- navbarPage(h4("Covid-19"),
                                      plotlyOutput("plot16"))
                           )
                  ),
-                 tabPanel(h4("World Data"),
+                 tabPanel("World Data",
                           fluidRow(
                               column(4,
                                      plotlyOutput("plot11")),
