@@ -23,7 +23,6 @@ world <- ne_countries()
 layer_id <- c(1:dim(world@data[1]))
 world@data["layer_id"] = layer_id
 
-
 #get all the country names
 names_df <- ncov[2]
 names_df <- names_df %>%
@@ -103,25 +102,6 @@ ncov2 <- ncov1 %>%
     summarise(conf = sum(confirmed), recov = sum(recovered, na.rm = T), deaths = sum(deaths), lat = mean(lat), long = mean(long)) %>%
     mutate(current = conf - recov - deaths)
 
-# daily world statistics dataframe
-ncov_world <- ncov1 %>%
-    group_by(date) %>%
-    summarise(conf = sum(confirmed, na.rm = T), recov = sum(recovered, na.rm = T), deaths = sum(deaths, na.rm = T))
-
-#creating a daily account of new cases, new deaths and new recoveries for barhraphs
-#intial data was cumulative so it needs to change to make it give new cases only
-
-deaths_bar <- ncov_world$deaths[1]
-recov_bar <- ncov_world$recov[1]
-conf_bar <- ncov_world$conf[1]
-dates_bar <- as.Date(ncov_world$date[1])
-
-for (i in 2: nrow(ncov_world)){
-    deaths_bar <- c(deaths_bar, ncov_world$deaths[i]-ncov_world$deaths[i-1] )
-    recov_bar <- c(recov_bar, ncov_world$recov[i]- ncov_world$recov[i-1] )
-    conf_bar <- c(conf_bar, ncov_world$conf[i]-ncov_world$conf[i-1] )
-    dates_bar <-  c(dates_bar, as.Date(ncov_world$date[i]))
-}
 #creating the dataframes
 
 conf1 <- as.data.frame(conf_bar)
@@ -209,6 +189,15 @@ ui <- navbarPage(h4("Covid-19"),
                                      plotlyOutput("plot2")),
                               column(4,
                                      plotlyOutput("plot3"))
+                          ),
+                          
+                          fluidRow(
+                              column(4,
+                                     plotlyOutput("plot14")),
+                              column(4,
+                                     plotlyOutput("plot15")),
+                              column(4,
+                                     plotlyOutput("plot16"))
                           )
                  ),
                  tabPanel(h4("World Data"),
@@ -398,6 +387,51 @@ server <- function(input, output, session) {
         p
     })
     
+    output$plot14 <- renderPlotly({
+        
+        
+        data <- ncov2 %>% filter(name %in% input$country2)
+        #create a variable that only takes the difference between
+        #successive readings. This makes it easier to find new cases
+        data$conf <- c(data$conf[1] ,diff(data$conf))
+        data$recov <- c(data$recov[1] ,diff(data$recov))
+        data$deaths <- c(data$deaths[1] ,diff(data$deaths))
+        
+        p <- ggplot(data, aes(x= date, y = conf)) +
+            geom_bar(position = "stack", stat = "identity", fill ="#000066") + 
+            ylab("New Cases") + xlab("Date") + theme(plot.background = element_rect(fill = "#f5f5f5"))  + scale_x_date(date_labels = "%d-%b")
+        ggplotly(p)
+    })
+    
+    output$plot15 <- renderPlotly({
+       
+        data <- ncov2 %>% filter(name %in% input$country2)
+        #create a variable that only takes the difference between
+        #successive readings. This makes it easier to find new cases
+        data$conf <- c(data$conf[1] ,diff(data$conf))
+        data$recov <- c(data$recov[1] ,diff(data$recov))
+        data$deaths <- c(data$deaths[1] ,diff(data$deaths))
+        
+        p <- ggplot(data, aes(x= date, y = recov)) +
+            geom_bar(position = "stack", stat = "identity", fill = "#000066") + 
+            ylab("New Cases") + xlab("Date") + theme(plot.background = element_rect(fill = "#f5f5f5"))  + scale_x_date(date_labels = "%d-%b")
+        ggplotly(p)
+    })
+    
+    output$plot16 <- renderPlotly({
+        data <- ncov2 %>% filter(name %in% input$country2)
+        #create a variable that only takes the difference between
+        #successive readings. This makes it easier to find new cases
+        data$conf <- c(data$conf[1] ,diff(data$conf))
+        data$recov <- c(data$recov[1] ,diff(data$recov))
+        data$deaths <- c(data$deaths[1] ,diff(data$deaths))
+        
+        p <- ggplot(data, aes(x= date, y = deaths)) +
+            geom_bar(position = "stack", stat = "identity", fill = "#000066") + 
+            ylab("New Cases") + xlab("Date") + theme(plot.background = element_rect(fill = "#f5f5f5"))  + scale_x_date(date_labels = "%d-%b")
+        ggplotly(p)
+    })
+    
     output$text1 <- renderText({
         paste(comma(max(ncov_world$deaths)))
     })
@@ -456,7 +490,7 @@ server <- function(input, output, session) {
             attributionControl=FALSE)) %>%
             addPolygons(layerId = layer_id ,color = ~pal(Confirmed), weight = 1, smoothFactor = 0.5,
                         opacity = 1.0, fillOpacity = 0.5,
-                        highlightOptions = highlightOptions(color = "#000066", weight = 2,
+                        highlightOptions = highlightOptions(color = "#009933", weight = 2,
                                                             bringToFront = TRUE), label = world@data$name) %>%
             
             addLegend( pal = pal, values = ~Confirmed,
@@ -480,7 +514,7 @@ server <- function(input, output, session) {
             proxy %>% setView(lng=polygon_labelPt[1],lat=polygon_labelPt[2],zoom=2)
             
             #add a slightly thicker red polygon on top of the selected one
-            proxy %>% addPolylines(stroke=TRUE, weight = 4,color="#000066", fill = "#000066",data=selected_polygon,layerId="highlighted_polygon")
+            proxy %>% addPolylines(stroke=TRUE, weight = 4, fillOpacity = 1, color="#009933", fill = "#009933",data=selected_polygon,layerId="highlighted_polygon")
             
         }
         
